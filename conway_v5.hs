@@ -60,6 +60,37 @@ patrones = [("Glider", patronGlider, 10, 10), ("LWSS", patronLWSS, 12, 12), ("Pu
 insertarPatron :: Board -> [Pos] -> Board
 insertarPatron board posiciones = board // [(pos, 1) | pos <- posiciones, inRange (bounds board) pos]
 
+-- Mostrar tablero
+mostrarBoard :: Board -> IO ()
+mostrarBoard board = do
+  putStrLn "\ESC[2J"
+  let (_, (w, h)) = bounds board
+  putStrLn $ intercalate "\n" [[if board ! (x, y) == 1 then '*' else '.' | y <- [0 .. h]] | x <- [0 .. w]]
+
+-- Contar vecinos vivos
+contarVecinos :: Board -> Pos -> Int
+contarVecinos board (x, y) = length [(dx, dy) | dx <- [-1, 0, 1], dy <- [-1, 0, 1], (dx, dy) /= (0, 0), vivo (x + dx, y + dy)]
+  where
+    vivo (nx, ny) = inRange (bounds board) (nx, ny) && board ! (nx, ny) == 1
+
+-- Avanzar una generación
+siguienteGen :: Board -> Board
+siguienteGen board = array (bounds board) [((x, y), actualizarCelda (x, y)) | (x, y) <- indices board]
+  where
+    actualizarCelda pos
+      | board ! pos == 1 && (nVecinos == 2 || nVecinos == 3) = 1
+      | board ! pos == 0 && nVecinos == 3 = 1
+      | otherwise = 0
+      where
+        nVecinos = contarVecinos board pos
+
+-- Loop de ejecución automática
+autoLoop :: Board -> IO ()
+autoLoop board = do
+  mostrarBoard board
+  threadDelay 400000
+  autoLoop (siguienteGen board)
+
 -- Seleccionar patrón o personalizar tamaño
 seleccionarPatron :: IO Board
 seleccionarPatron = do
