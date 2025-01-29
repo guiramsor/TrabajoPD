@@ -104,10 +104,10 @@ seleccionarPatron = do
     else do
       putStr "Introduce ancho del tablero: "
       hFlush stdout
-      w <- readLn
+      w <- hSetEcho stdin True >> readLn <* hSetEcho stdin False
       putStr "Introduce alto del tablero: "
       hFlush stdout
-      h <- readLn
+      h <- hSetEcho stdin True >> readLn <* hSetEcho stdin False
       configurarBoard (initBoard w h) (0, 0)
 
 -- Main
