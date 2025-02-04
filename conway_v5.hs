@@ -116,18 +116,19 @@ moverCursor board (x, y) 'a' = (x, max 0 (y - 1))
 moverCursor board (x, y) 'd' = (x, min (snd (snd (bounds board))) (y + 1))
 moverCursor _ pos _        = pos
 
--- Editar el tablero interactivamente: mover cursor y activar células al presionar 'v'
+-- Editar el tablero interactivamente: mover cursor y activar células al presionar ENTER
 configurarBoard :: Board -> Pos -> IO Board
 configurarBoard board cursor = do
   mostrarBoard board cursor
-  putStrLn "Usa WASD para mover el cursor, V para colocar células vivas, I para iniciar:"
+  putStrLn "Usa WASD para mover el cursor, ENTER para colocar células vivas, I para iniciar:"
   hFlush stdout
   key <- getChar
   let nuevoCursor = moverCursor board cursor key
-  case toLower key of
-    'v' -> configurarBoard (board // [(nuevoCursor, Viva)]) nuevoCursor
-    'i' -> return board
-    _   -> configurarBoard board nuevoCursor
+  case key of
+    '\n' -> configurarBoard (board // [(cursor, Viva)]) cursor
+    c | toLower c == 'i' -> return board
+    _    -> configurarBoard board nuevoCursor
+
 
 -- Seleccionar un patrón predefinido o personalizar el tablero
 seleccionarPatron :: IO Board
@@ -137,7 +138,10 @@ seleccionarPatron = do
   putStrLn "0. Personalizar"
   putStr "Tu elección: "
   hFlush stdout
+  -- Activamos echo para que el usuario vea lo que escribe
+  hSetEcho stdin True
   choice <- readLn
+  hSetEcho stdin False
   if choice >= 1 && choice <= length patrones
     then let patronSeleccionado = patrones !! (choice - 1)
          in return $ insertarPatron 
@@ -146,10 +150,14 @@ seleccionarPatron = do
     else do
       putStr "Introduce ancho del tablero: "
       hFlush stdout
+      hSetEcho stdin True
       w <- readLn
+      hSetEcho stdin False
       putStr "Introduce alto del tablero: "
       hFlush stdout
+      hSetEcho stdin True
       h <- readLn
+      hSetEcho stdin False
       configurarBoard (initBoard w h) (0, 0)
 
 -- Función principal
