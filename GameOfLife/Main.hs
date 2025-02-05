@@ -3,46 +3,33 @@ module Main where
 import System.IO (hSetBuffering, hSetEcho, BufferMode(NoBuffering), stdin, stdout, hFlush)
 import Control.Concurrent (threadDelay)
 import Data.Char (toLower)
-
 import Tablero
 import Patrones
+import qualified Data.Map as M
 
--- Editar el tablero interactivamente: mover cursor y activar células al presionar ENTER
-configurarTablero :: Tablero -> Pos -> IO Tablero
-configurarTablero tablero cursor = do
-  mostrarTablero tablero cursor
-  putStrLn "Usa WASD para mover el cursor, ENTER para colocar células vivas, I para iniciar:"
-  hFlush stdout
-  key <- getChar
-  let nuevoCursor = moverCursor tablero cursor key
-  case key of
-    '\n' -> configurarTablero (actualizarCelula tablero cursor Viva) cursor
-    c | toLower c == 'i' -> return tablero
-    _    -> configurarTablero tablero nuevoCursor
+-- Inspirado en P9.3: funciones sencillas para mover cursor y borrar pantalla
+mueveCursor :: Int -> Int -> IO ()
+mueveCursor x y = putStr $ "\ESC[" ++ show y ++ ";" ++ show x ++ "H"
 
--- Loop de ejecución automática: muestra el tablero y avanza en generaciones
-autoLoop :: Tablero -> IO ()
-autoLoop tablero = do
-  mostrarTablero tablero (-1, -1)
-  threadDelay 300000
-  autoLoop (siguienteGen tablero)
+borraPantalla :: IO ()
+borraPantalla = putStr "\ESC[2J"
 
--- Seleccionar un patrón predefinido o personalizar el tablero
+-- Selección del patrón. Se usa Data.Map para asociar opciones.
 seleccionarPatron :: IO Tablero
 seleccionarPatron = do
-  putStrLn "Elige un patrón o personaliza el tablero:"
-  mapM_ (\(i, patron) -> putStrLn (show i ++ ". " ++ nombre patron)) (zip [1..] patrones)
-  putStrLn "0. Personalizar"
-  putStr "Tu elección: "
+  putStrLn "Elige un patrón (o 0 para personalizar):"
+  let mapaPatrones = M.fromList $ zip [1..] patrones
+  mapM_ (\(i, p) -> putStrLn $ show i ++ ". " ++ nombre p) (M.toList mapaPatrones)
+  putStr "Opción: "
   hFlush stdout
   hSetEcho stdin True
-  choice <- readLn
+  opcion <- readLn
   hSetEcho stdin False
-  if choice >= 1 && choice <= length patrones
-    then let patronSeleccionado = patrones !! (choice - 1)
-         in return $ insertarPatron 
-                      (initTablero (ancho patronSeleccionado) (alto patronSeleccionado))
-                      (posiciones patronSeleccionado)
+  if opcion >= 1 && opcion <= M.size mapaPatrones
+    then case M.lookup opcion mapaPatrones of
+           Just pat -> return $ insertarPatron (initTablero (ancho pat) (alto pat))
+                                                (posiciones pat)
+           Nothing  -> error "Opción incorrecta"
     else do
       putStr "Introduce ancho del tablero: "
       hFlush stdout
@@ -54,12 +41,37 @@ seleccionarPatron = do
       hSetEcho stdin True
       h <- readLn
       hSetEcho stdin False
-      configurarTablero (initTablero w h) (0, 0)
+      return $ initTablero w h
+
+-- Modo interactivo para editar el tablero: se mueve el cursor y se activa una celda al pulsar ENTER.
+configurarTablero :: Tablero -> Pos -> IO Tablero
+configurarTablero tab cursor = do
+  mostrarTablero tab cursor
+  putStrLn "Usa WASD para mover el cursor, ENTER para activar, I para iniciar:"
+  hFlush stdout
+  tecla <- getChar
+  let nuevoCursor = moverCursor tab cursor tecla
+  case tecla of
+    '\n' -> configurarTablero (actualizarCelula tab cursor Viva) cursor
+    c | toLower c == 'i' -> return tab
+    _ -> configurarTablero tab nuevoCursor
+
+-- Bucle que avanza en generaciones, con una pausa breve.
+autoLoop :: Tablero -> IO ()
+autoLoop tab = do
+  mostrarTablero tab (-1, -1)
+  threadDelay 300000
+  autoLoop (siguienteGen tab)
 
 main :: IO ()
 main = do
   hSetBuffering stdin NoBuffering
   hSetBuffering stdout NoBuffering
   hSetEcho stdin False
-  boardInicial <- seleccionarPatron
-  autoLoop boardInicial
+  borraPantalla
+  putStrLn "Bienvenido al juego de la vida de John Conway."
+  putStrLn "Pulsa ENTER para continuar..."
+  _ <- getChar
+  tabInicial <- seleccionarPatron
+  tabFinal <- configurarTablero tabInicial (0,0)
+  autoLoop tabFinal

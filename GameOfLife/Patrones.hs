@@ -8,20 +8,20 @@ module Patrones
 
 import Tablero (Pos)
 
--- Tipo de dato para representar un patrón predefinido
-data Patron = Patron 
+-- Tipo de dato para un patrón predefinido
+data Patron = Patron
   { nombre     :: String
   , posiciones :: [Pos]
   , ancho      :: Int
-  , alto       :: Int 
+  , alto       :: Int
   } deriving (Show, Eq)
 
--- Patrones predefinidos
+-- Algunos patrones clásicos
 gliderPatron :: Patron
-gliderPatron = Patron "Glider" [(0,1), (1,2), (2,0), (2,1), (2,2)] 10 10
+gliderPatron = Patron "Glider" [(0,1),(1,2),(2,0),(2,1),(2,2)] 10 10
 
 lwssPatron :: Patron
-lwssPatron = Patron "LWSS" [(1,1), (1,4), (2,5), (3,1), (3,5), (4,2), (4,3), (4,4), (4,5)] 8 20
+lwssPatron = Patron "LWSS" [(1,1),(1,4),(2,5),(3,1),(3,5),(4,2),(4,3),(4,4),(4,5)] 8 20
 
 pulsarPatron :: Patron
 pulsarPatron = Patron "Pulsar" 
