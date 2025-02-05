@@ -6,7 +6,7 @@ module Patrones
   , patrones
   ) where
 
-import Board (Pos)
+import Tablero (Pos)
 
 -- Tipo de dato para representar un patrón predefinido
 data Patron = Patron 

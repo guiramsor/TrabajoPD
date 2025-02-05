@@ -3,33 +3,31 @@ module Main where
 import System.IO (hSetBuffering, hSetEcho, BufferMode(NoBuffering), stdin, stdout, hFlush)
 import Control.Concurrent (threadDelay)
 import Data.Char (toLower)
-import Board
+import Tablero
 import Patrones
-import Data.Array
-
 
 -- Editar el tablero interactivamente: mover cursor y activar células al presionar ENTER
-configurarBoard :: Board -> Pos -> IO Board
-configurarBoard board cursor = do
-  mostrarBoard board cursor
+configurarTablero :: Tablero -> Pos -> IO Tablero
+configurarTablero tablero cursor = do
+  mostrarTablero tablero cursor
   putStrLn "Usa WASD para mover el cursor, ENTER para colocar células vivas, I para iniciar:"
   hFlush stdout
   key <- getChar
-  let nuevoCursor = moverCursor board cursor key
+  let nuevoCursor = moverCursor tablero cursor key
   case key of
-    '\n' -> configurarBoard (board // [(cursor, Viva)]) cursor
-    c | toLower c == 'i' -> return board
-    _    -> configurarBoard board nuevoCursor
+    '\n' -> configurarTablero (actualizarCelula tablero cursor Viva) cursor
+    c | toLower c == 'i' -> return tablero
+    _    -> configurarTablero tablero nuevoCursor
 
 -- Loop de ejecución automática: muestra el tablero y avanza en generaciones
-autoLoop :: Board -> IO ()
-autoLoop board = do
-  mostrarBoard board (-1, -1)
+autoLoop :: Tablero -> IO ()
+autoLoop tablero = do
+  mostrarTablero tablero (-1, -1)
   threadDelay 400000
-  autoLoop (siguienteGen board)
+  autoLoop (siguienteGen tablero)
 
 -- Seleccionar un patrón predefinido o personalizar el tablero
-seleccionarPatron :: IO Board
+seleccionarPatron :: IO Tablero
 seleccionarPatron = do
   putStrLn "Elige un patrón o personaliza el tablero:"
   mapM_ (\(i, patron) -> putStrLn (show i ++ ". " ++ nombre patron)) (zip [1..] patrones)
@@ -42,7 +40,7 @@ seleccionarPatron = do
   if choice >= 1 && choice <= length patrones
     then let patronSeleccionado = patrones !! (choice - 1)
          in return $ insertarPatron 
-                      (initBoard (ancho patronSeleccionado) (alto patronSeleccionado))
+                      (initTablero (ancho patronSeleccionado) (alto patronSeleccionado))
                       (posiciones patronSeleccionado)
     else do
       putStr "Introduce ancho del tablero: "
@@ -55,7 +53,7 @@ seleccionarPatron = do
       hSetEcho stdin True
       h <- readLn
       hSetEcho stdin False
-      configurarBoard (initBoard w h) (0, 0)
+      configurarTablero (initTablero w h) (0, 0)
 
 main :: IO ()
 main = do
