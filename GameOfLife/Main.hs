@@ -3,6 +3,7 @@ module Main where
 import System.IO (hSetBuffering, hSetEcho, BufferMode(NoBuffering), stdin, stdout, hFlush)
 import Control.Concurrent (threadDelay)
 import Data.Char (toLower)
+
 import Tablero
 import Patrones
 
@@ -23,7 +24,7 @@ configurarTablero tablero cursor = do
 autoLoop :: Tablero -> IO ()
 autoLoop tablero = do
   mostrarTablero tablero (-1, -1)
-  threadDelay 400000
+  threadDelay 300000
   autoLoop (siguienteGen tablero)
 
 -- Seleccionar un patrón predefinido o personalizar el tablero

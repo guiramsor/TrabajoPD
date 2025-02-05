@@ -36,7 +36,7 @@ Patrones Predefinidos:
 
 Reglas de Simulación:
 ---------------------
-- Intervalo de actualización: 0.4 segundos
+- Intervalo de actualización: 0.3 segundos
 - Reglas para células:
   * Viva con <2  vecinos → Muerta (subpoblación)
   * Viva con 2-3 vecinos → Sobrevive
