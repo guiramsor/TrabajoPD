@@ -1,3 +1,18 @@
+-- ---------------------------------------------------------------------
+-- § Juego de la Vida de John Conway
+
+-- Mini-Proyecto Realizado por:
+-- * Jatin Dulani - (BLD2172)
+-- * Guillermo Ramón Soria - (guiramsor)
+
+-- Este módulo gestiona la interacción con el usuario, la selección
+-- del patrón o la personalización del tablero, y el bucle principal
+-- de ejecución.
+  
+-- Se usan secuencias de escape para limpiar la pantalla y mover el cursor,
+-- siguiendo el estilo de las prácticas.
+-- ---------------------------------------------------------------------
+
 module Main where
 
 import System.IO (hSetBuffering, hSetEcho, BufferMode(NoBuffering), stdin, stdout, hFlush)
@@ -7,13 +22,18 @@ import Tablero
 import Patrones
 import qualified Data.Map as M
 
+-- ---------------------------------------------------------------------
+-- Secuencias de escape para control del terminal
+-- ---------------------------------------------------------------------
 mueveCursor :: Int -> Int -> IO ()
 mueveCursor x y = putStr $ "\ESC[" ++ show y ++ ";" ++ show x ++ "H"
 
 borraPantalla :: IO ()
 borraPantalla = putStr "\ESC[2J"
 
--- Selección del patrón de la lista de patrones
+-- ---------------------------------------------------------------------
+-- Se muestra un menú con los patrones predefinidos. (0 para personalizar)
+-- ---------------------------------------------------------------------
 seleccionarPatron :: IO Tablero
 seleccionarPatron = do
   putStrLn "Elige un patrón (o 0 para personalizar):"
@@ -41,7 +61,11 @@ seleccionarPatron = do
       hSetEcho stdin False
       return $ initTablero nf nc
 
--- Modo interactivo para editar el tablero
+-- ---------------------------------------------------------------------
+-- Configuración interactiva del tablero
+-- Permite al usuario editar el tablero moviendo el cursor y activando
+-- celdas (con ENTER). Se termina con la tecla 'I'.
+-- ---------------------------------------------------------------------
 configurarTablero :: Tablero -> Pos -> IO Tablero
 configurarTablero tab cursor = do
   mostrarTablero tab cursor
@@ -54,13 +78,19 @@ configurarTablero tab cursor = do
     c | toLower c == 'i' -> return tab
     _ -> configurarTablero tab nuevoCursor
 
--- Bucle que avanza en generaciones
+-- ---------------------------------------------------------------------
+-- Bucle principal: avanza en generaciones con una breve pausa.
+-- ---------------------------------------------------------------------
 autoLoop :: Tablero -> IO ()
 autoLoop tab = do
   mostrarTablero tab (-1, -1)
   threadDelay 300000
   autoLoop (siguienteGen tab)
 
+-- ---------------------------------------------------------------------
+-- Función principal.
+-- Selecciona o personaliza el tablero y arranca el juego.
+-- ---------------------------------------------------------------------
 main :: IO ()
 main = do
   hSetBuffering stdin NoBuffering
