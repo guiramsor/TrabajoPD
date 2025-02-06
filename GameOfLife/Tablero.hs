@@ -59,10 +59,10 @@ mostrarTablero tablero cursor = do
   putStr "\ESC[2J"
   let (_, (numFilas, numCol)) = bounds tablero
   putStrLn $ intercalate "\n"
-    [ [ if (fila, col) == cursor then '@'
+    [[ if (fila, col) == cursor then '@'
          else mostrarCelula (tablero ! (fila, col))
-      | col <- [0 .. numCol - 1] ]
-    | fila <- [0 .. numFilas - 1] ]
+      | col <- [0 .. numCol]]
+      | fila <- [0 .. numFilas]]
 
 -- ---------------------------------------------------------------------
 -- Cálculo de la siguiente generación
