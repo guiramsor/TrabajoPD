@@ -15,7 +15,7 @@ Instrucciones de Ejecución:
 4. Ejecute el programa:
    > main
 5. Seleccione una opción:
-   - Elija un patrón predefinido (1-3) 
+   - Elija un patrón predefinido (1-3) [el rango puede aumentar a medida que se añadan patrones (1-patrones.size())] 
    - Ingrese 0 para personalizar el tablero:
      * Especifique ancho/alto
      * Use WASD y ENTER para colocar células
@@ -33,6 +33,7 @@ Patrones Predefinidos:
 1. Glider  : Estructura móvil con desplazamiento diagonal.
 2. LWSS    : "Nave ligera" de planeador espacial.
 3. Pulsar  : Oscilador periódico de 3 fases.
+...
 
 Reglas de Simulación:
 ---------------------
