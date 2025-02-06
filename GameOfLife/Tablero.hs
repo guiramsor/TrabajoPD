@@ -71,7 +71,6 @@ mostrarTablero tablero cursor = do
 contarVecinos :: Tablero -> Pos -> Int
 contarVecinos tablero (x, y) = length $ filter esViva vecinos
   where
-    vecinos :: [Pos]
     vecinos = [(x + dx, y + dy) | dx <- [-1, 0, 1], dy <- [-1, 0, 1], (dx, dy) /= (0, 0)]
     esViva pos = inRange (bounds tablero) pos && tablero ! pos == Viva
 
