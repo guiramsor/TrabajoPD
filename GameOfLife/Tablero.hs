@@ -9,13 +9,12 @@ module Tablero
   , siguienteGen
   , moverCursor
   , actualizarCelula
-  -- , analizaVecinos
+  , reglaConway
   ) where
 
 import Data.Array
-import Data.List (intercalate)
+import Data.List (intercalate, nub)
 
--- Tipo de datos para las células
 data Celula = Viva | Muerta deriving (Show, Eq)
 
 type Tablero = Array (Int, Int) Celula
@@ -26,12 +25,12 @@ initTablero :: Int -> Int -> Tablero
 initTablero numFilas numCol = array ((0, 0), (numFilas - 1, numCol - 1))
   [ ((fila, col), Muerta) | fila <- [0 .. numFilas - 1], col <- [0 .. numCol - 1] ]
 
--- Inserta un patrón en el tablero 
+-- Inserta un patrón en el tablero (se eliminan duplicados con nub)
 insertarPatron :: Tablero -> [Pos] -> Tablero
 insertarPatron tablero posList =
-  tablero // [ (pos, Viva) | pos <- posList, inRange (bounds tablero) pos ]
+  tablero // [ (pos, Viva) | pos <- nub posList, inRange (bounds tablero) pos ]
 
--- carácter de la celula
+-- Convierte una célula en un carácter
 mostrarCelula :: Celula -> Char
 mostrarCelula Viva   = '*'
 mostrarCelula Muerta = '.'
@@ -58,12 +57,15 @@ contarVecinos tablero (x, y) = length $ filter esViva vecinos
 -- Calcula la siguiente generación del tablero según las reglas de Conway
 siguienteGen :: Tablero -> Tablero
 siguienteGen tablero = array (bounds tablero)
-  [ ((fila, col), nuevaEstado (tablero ! (fila, col)) (contarVecinos tablero (fila, col)))
+  [ ((fila, col), reglaConway (tablero ! (fila, col)) (contarVecinos tablero (fila, col))) 
   | (fila, col) <- indices tablero ]
-  where
-    nuevaEstado Viva n | n == 2 || n == 3 = Viva
-    nuevaEstado Muerta n | n == 3 = Viva
-    nuevaEstado _ _ = Muerta
+
+-- Función de reglas de Conway, definida completamente con guardas
+reglaConway :: Celula -> Int -> Celula
+reglaConway c n
+  | c == Viva   && (n == 2 || n == 3) = Viva
+  | c == Muerta && n == 3             = Viva
+  | otherwise                         = Muerta
 
 -- Mueve el cursor según la tecla
 moverCursor :: Tablero -> Pos -> Char -> Pos
@@ -76,11 +78,3 @@ moverCursor _ pos _ = pos
 -- Actualiza una celda del tablero
 actualizarCelula :: Tablero -> Pos -> Celula -> Tablero
 actualizarCelula tablero pos est = tablero // [(pos, est)]
-
--- analizaVecinos :: Int -> String
--- analizaVecinos n
---   | n < 2     = "Célula aislada"       
---   | n == 2    = "Vive en equilibrio"   
---   | n == 3    = "Perfectamente viva"   
---   | n > 3     = "Sobrepoblada"         
-

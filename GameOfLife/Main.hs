@@ -25,22 +25,21 @@ seleccionarPatron = do
   opcion <- readLn
   hSetEcho stdin False
   if opcion >= 1 && opcion <= M.size mapaPatrones
-  then let Just pat = M.lookup opcion mapaPatrones
-       in return $ insertarPatron (initTablero (numFilas pat) (numCol pat))
-                                    (posiciones pat)
-  else do
-    putStr "Introduce número de filas: "
-    hFlush stdout
-    hSetEcho stdin True
-    nf <- readLn
-    hSetEcho stdin False
-    putStr "Introduce número de columnas: "
-    hFlush stdout
-    hSetEcho stdin True
-    nc <- readLn
-    hSetEcho stdin False
-    return $ initTablero nf nc
-
+    then let Just pat = M.lookup opcion mapaPatrones
+         in return $ insertarPatron (initTablero (numFilas pat) (numCol pat))
+                                      (posiciones pat)
+    else do
+      putStr "Introduce número de filas: "
+      hFlush stdout
+      hSetEcho stdin True
+      nf <- readLn
+      hSetEcho stdin False
+      putStr "Introduce número de columnas: "
+      hFlush stdout
+      hSetEcho stdin True
+      nc <- readLn
+      hSetEcho stdin False
+      return $ initTablero nf nc
 
 -- Modo interactivo para editar el tablero
 configurarTablero :: Tablero -> Pos -> IO Tablero
@@ -71,8 +70,6 @@ main = do
   putStrLn "Bienvenido al Juego de la Vida de John Conway."
   putStrLn "Pulsa ENTER para continuar..."
   _ <- getChar
-  -- putStrLn $ "Con 3 vecinos: " ++ analizaVecinos 3
   tabInicial <- seleccionarPatron
   tabFinal <- configurarTablero tabInicial (0,0)
   autoLoop tabFinal
-
