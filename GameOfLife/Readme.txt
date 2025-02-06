@@ -24,9 +24,9 @@ Instrucciones de Ejecución:
 Controles:
 ----------
 - Movimiento:         W (arriba), A (izquierda), S (abajo), D (derecha)
-- Modificar tablero:  ENTER (alternar célula en posición del cursor)
+- Modificar tablero:  ENTER (añadir celula viva donde el cursor '@')
 - Iniciar simulación: I
-- Salir:              Ctrl + C (en terminal)
+- Salir:              Ctrl + C
 
 Patrones Predefinidos:
 ----------------------
